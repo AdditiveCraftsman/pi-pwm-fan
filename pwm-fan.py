@@ -15,7 +15,7 @@ HYSTERESIS  = 2.0     # °C dead band — prevents oscillation near thresholds
 # Temperature curve: (temp_°C, fan_duty_%)
 # Fan stays at 0% below 45°C, ramps linearly to 100% at 70°C
 TEMP_CURVE = [
-    (45.0,   0),
+    (45.0,  20),
     (50.0,  25),
     (55.0,  50),
     (60.0,  70),
