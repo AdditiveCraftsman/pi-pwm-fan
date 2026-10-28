@@ -122,7 +122,7 @@ class FanMonitor:
             t1, d1 = CURVE[i]
             t2, d2 = CURVE[i + 1]
             if t1 <= temp_c <= t2:
-                return int(d1 + (temp_c - t1) / (t2 - t1) * (d2 - d1))
+                return int(round(d1 + (temp_c - t1) / (t2 - t1) * (d2 - d1)))
         return 0
 
     def fmt_temp(self, t):
@@ -304,10 +304,10 @@ class FanMonitor:
                     pos = int(d / 100.0 * (bw - 1))
                     if pos < bw:
                         markers[pos] = "|"
-                    lbl = str(t)
+                    lbl = "{:g}".format(t)
+                    start = min(pos, bw - len(lbl))  # keep the last label on screen
                     for ci, ch in enumerate(lbl):
-                        if pos + ci < bw:
-                            labels[pos + ci] = ch
+                        labels[start + ci] = ch
                 self.put(scr, r, 0, "".join(markers))
                 r += 1
                 self.put(scr, r, 0, "".join(labels))
