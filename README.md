@@ -103,7 +103,7 @@ How it works: it reads temperatures from the kernel and `vcgencmd`, and gets the
 
 - The duty reading shows `--%` until the fan has changed speed at least once since boot, because that is when the service logs a line.
 - Your user needs permission to read the journal (membership in the `systemd-journal` group, or run with `sudo`).
-- The "Target" value and the curve bar use the **gaming** curve, defined as `GAMING_CURVE` at the top of the file. Edit it if you installed the standard curve.
+- The "Target" value and the curve bar read `TEMP_CURVE` from the installed `/usr/local/bin/pwm-fan.py`, so they always match the curve that is running (standard or gaming). If that file can't be read, it falls back to the standard curve.
 
 ## Known limitations
 

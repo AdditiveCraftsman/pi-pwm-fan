@@ -14,13 +14,34 @@ import sys
 import signal
 import subprocess
 import re
+import ast
 from collections import deque
 from datetime import datetime
 
-GAMING_CURVE = [
-    (40, 10), (45, 30), (50, 55),
-    (55, 75), (60, 90), (65, 100),
+# Fallback if the installed controller can't be read (matches the "standard" curve).
+DEFAULT_CURVE = [
+    (45, 20), (50, 25), (55, 50),
+    (60, 70), (65, 85), (70, 100),
 ]
+CONTROLLER_PATH = "/usr/local/bin/pwm-fan.py"
+
+
+def load_curve():
+    """Read TEMP_CURVE from the installed controller so the monitor always
+    matches the curve that is actually running (standard or gaming)."""
+    try:
+        with open(CONTROLLER_PATH) as f:
+            m = re.search(r"^TEMP_CURVE\s*=\s*(\[.*?\])", f.read(), re.S | re.M)
+        curve = ast.literal_eval(m.group(1))
+        curve = [(float(t), float(d)) for t, d in curve]
+        if len(curve) >= 2 and curve == sorted(curve):
+            return curve
+    except (OSError, AttributeError, ValueError, SyntaxError, TypeError):
+        pass
+    return DEFAULT_CURVE
+
+
+CURVE = load_curve()
 
 
 class FanMonitor:
@@ -92,13 +113,14 @@ class FanMonitor:
     def get_curve_duty(self, temp_c):
         if temp_c is None:
             return 0
-        if temp_c <= GAMING_CURVE[0][0]:
-            return GAMING_CURVE[0][1]
-        if temp_c >= GAMING_CURVE[-1][0]:
-            return GAMING_CURVE[-1][1]
-        for i in range(len(GAMING_CURVE) - 1):
-            t1, d1 = GAMING_CURVE[i]
-            t2, d2 = GAMING_CURVE[i + 1]
+        # Same rules as pwm-fan.py: off at/below the first point, full at/above the last
+        if temp_c <= CURVE[0][0]:
+            return 0
+        if temp_c >= CURVE[-1][0]:
+            return 100
+        for i in range(len(CURVE) - 1):
+            t1, d1 = CURVE[i]
+            t2, d2 = CURVE[i + 1]
             if t1 <= temp_c <= t2:
                 return int(d1 + (temp_c - t1) / (t2 - t1) * (d2 - d1))
         return 0
@@ -278,7 +300,7 @@ class FanMonitor:
             if bw > 10:
                 markers = list(" " * bw)
                 labels = list(" " * bw)
-                for t, d in GAMING_CURVE:
+                for t, d in CURVE:
                     pos = int(d / 100.0 * (bw - 1))
                     if pos < bw:
                         markers[pos] = "|"
