@@ -3,6 +3,8 @@ Description=Pigpio daemon
 After=network.target
 
 [Service]
+# Path note: apt installs pigpiod to /usr/bin/pigpiod; a source build uses /usr/local/bin/pigpiod.
+# The installer fills in the right path automatically; edit ExecStart if you install by hand.
 Type=forking
 ExecStart=/usr/local/bin/pigpiod
 ExecStop=/bin/systemctl kill pigpiod

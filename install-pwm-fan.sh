@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ── PWM Fan Installer for Raspberry Pi 3B ─────────────────
-# Repo: github.com/AdditiveCraftsman/ai-on-the-pi
+# Repo: github.com/AdditiveCraftsman/pi-pwm-fan
 # Usage: sudo ./install-pwm-fan.sh [--curve standard|gaming]
 
 # ── Colors ─────────────────────────────────────────────────
@@ -133,7 +133,7 @@ if [[ "$CURVE" == "gaming" ]]; then
 ]'
 else
     CURVE_BLOCK='TEMP_CURVE = [
-    (45.0,   0),
+    (45.0,  20),
     (50.0,  25),
     (55.0,  50),
     (60.0,  70),
@@ -153,9 +153,9 @@ import logging
 
 # ── Configuration ──────────────────────────────────────────
 GPIO_PIN    = 18      # Hardware PWM pin (GPIO 18 = header pin 12)
-PWM_FREQ    = 250     # Hz — standard for PC fans
+PWM_FREQ    = 250     # Hz -- suits the transistor circuit; 4-wire PWM fans want 25000
 POLL_SEC    = 5       # Seconds between temperature checks
-HYSTERESIS  = 2.0     # °C dead band — prevents oscillation near thresholds
+HYSTERESIS  = 2.0     # duty-% dead band — prevents oscillation near thresholds
 
 # Temperature curve: (temp_°C, fan_duty_%)
 # Curve profile: $CURVE
@@ -245,14 +245,17 @@ ok "Fan script deployed with $CURVE curve"
 # ── Step 3: Deploy pigpiod service ─────────────────────────
 info "Step 3/6: Installing pigpiod systemd service..."
 
-cat > /etc/systemd/system/pigpiod.service << 'SVCEOF'
+# apt installs pigpiod to /usr/bin, a source build to /usr/local/bin: use whichever exists
+PIGPIOD_BIN="$(command -v pigpiod)"
+
+cat > /etc/systemd/system/pigpiod.service << SVCEOF
 [Unit]
 Description=Pigpio daemon
 After=network.target
 
 [Service]
 Type=forking
-ExecStart=/usr/local/bin/pigpiod
+ExecStart=$PIGPIOD_BIN
 ExecStop=/bin/systemctl kill pigpiod
 Restart=on-failure
 
