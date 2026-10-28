@@ -5,7 +5,7 @@ Temperature-controlled PWM fan for a Raspberry Pi 3B, using pigpio hardware PWM 
 ## Features
 
 - Smooth temperature curve instead of simple on/off
-- Hysteresis dead band (the speed only changes when the target moves by 2 percentage points or more), so the fan doesn't hunt up and down near a threshold
+- Hysteresis dead band (the speed only changes when the target moves by 5 percentage points or more), so the fan doesn't hunt up and down near a threshold
 - Startup safety: fan runs at 100% for 5 seconds on boot
 - Shutdown safety: fan goes to 100% if the service stops
 - Logs every speed change to the systemd journal

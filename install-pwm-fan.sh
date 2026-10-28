@@ -155,7 +155,7 @@ import logging
 GPIO_PIN    = 18      # Hardware PWM pin (GPIO 18 = header pin 12)
 PWM_FREQ    = 250     # Hz -- suits the transistor circuit; 4-wire PWM fans want 25000
 POLL_SEC    = 5       # Seconds between temperature checks
-HYSTERESIS  = 2.0     # duty-% dead band — prevents oscillation near thresholds
+HYSTERESIS  = 5.0     # duty-% dead band — prevents oscillation near thresholds
 
 # Temperature curve: (temp_°C, fan_duty_%)
 # Curve profile: $CURVE
